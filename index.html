@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гра-вікторина: Пуантилізм (Правда чи неправда)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Comic Sans MS', 'Bubblegum Sans', 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: #ffffff;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+            text-align: center;
+            border: 5px solid #ff80bf;
+            position: relative;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #ff3399;
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 0px #ffe6f2;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        .score-board {
+            background: #fff0f5;
+            border-radius: 15px;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            color: #ff1493;
+            font-weight: bold;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 2px dashed #ffb6c1;
+        }
+
+        .question-card {
+            background: #f0f8ff;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 3px solid #87ceeb;
+            box-shadow: 0 5px 15px rgba(0, 191, 255, 0.1);
+        }
+
+        .question-text {
+            font-size: 1.4rem;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .choice-btn {
+            flex: 1;
+            padding: 15px 25px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .choice-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+        }
+
+        .btn-true {
+            background-color: #2ecc71;
+            color: white;
+            border-bottom: 5px solid #27ae60;
+        }
+
+        .btn-true:hover {
+            background-color: #27ae60;
+        }
+
+        .btn-false {
+            background-color: #e74c3c;
+            color: white;
+            border-bottom: 5px solid #c0392b;
+        }
+
+        .btn-false:hover {
+            background-color: #c0392b;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-height: 30px;
+        }
+
+        .correct {
+            color: #27ae60;
+            animation: bounce 0.5s;
+        }
+
+        .incorrect {
+            color: #c0392b;
+            animation: shake 0.5s;
+        }
+
+        .restart-btn {
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            border-radius: 20px;
+            cursor: pointer;
+            border-bottom: 5px solid #8e44ad;
+            margin-top: 20px;
+            display: none;
+            box-shadow: 0 5px 0 rgba(0,0,0,0.15);
+        }
+
+        .restart-btn:hover {
+            background-color: #8e44ad;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-10px);}
+            60% {transform: translateY(-5px);}
+        }
+
+        @keyframes shake {
+            0%, 100% {transform: translateX(0);}
+            20%, 60% {transform: translateX(-8px);}
+            40%, 80% {transform: translateX(8px);}
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>🎨 Чарівні Точки: Пуантилізм</h1>
+    <div class="subtitle">Гра «Правда чи неправда»</div>
+
+    <div class="score-board">
+        ✨ Успішних завдань: <span id="score">0</span> / <span id="total-questions">0</span>
+    </div>
+
+    <div id="game-area">
+        <div class="question-card">
+            <div class="question-text" id="question-text">Завантаження запитання...</div>
+        </div>
+
+        <div class="btn-container" id="buttons-container">
+            <button class="choice-btn btn-true" onclick="checkAnswer(true)">
+                <span>👍</span> Правда
+            </button>
+            <button class="choice-btn btn-false" onclick="checkAnswer(false)">
+                <span>👎</span> Неправда
+            </button>
+        </div>
+
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+    <button class="restart-btn" id="restart-btn" onclick="restartGame()">Грати знову 🔄</button>
+</div>
+
+<script>
+    // Масив запитань на тему пуантилізму
+    const questions = [
+        {
+            text: "🎨 Пуантилізм — це стиль малювання, де картини створюються за допомогою маленьких крапок чи мазків чистого кольору.",
+            answer: true
+        },
+        {
+            text: "🖌️ Художники-пуантилісти змішували всі фарби на палітрі перед тим, як нанести їх на полотно.",
+            answer: false
+        },
+        {
+            text: "👀 На картинах у стилі пуантилізм кольори ніби змішуються самі, коли глядач дивиться на них з певної відстані.",
+            answer: true
+        },
+        {
+            text: "👨‍🎨 Знаменитий французький художник Жорж Сьора був одним із засновників цього дивовижного стилю.",
+            answer: true
+        },
+        {
+            text: "🖍️ У пуантилізмі категорично заборонялося використовувати синій та жовтий кольори.",
+            answer: false
+        }
+    ];
+
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let isAnswered = false;
+
+    const questionTextEl = document.getElementById('question-text');
+    const scoreEl = document.getElementById('score');
+    const totalQuestionsEl = document.getElementById('total-questions');
+    const feedbackEl = document.getElementById('feedback');
+    const buttonsContainer = document.getElementById('buttons-container');
+    const restartBtn = document.getElementById('restart-btn');
+
+    totalQuestionsEl.textContent = questions.length;
+
+    // Функція завантаження поточного запитання
+    function loadQuestion() {
+        isAnswered = false;
+        feedbackEl.textContent = '';
+        const currentQ = questions[currentQuestionIndex];
+        questionTextEl.textContent = currentQ.text;
+    }
+
+    // Перевірка відповіді користувача
+    function checkAnswer(userAnswer) {
+        if (isAnswered) return;
+        isAnswered = true;
+
+        const currentQ = questions[currentQuestionIndex];
+        
+        if (userAnswer === currentQ.answer) {
+            score++;
+            scoreEl.textContent = score;
+            feedbackEl.textContent = '🎉 Ура! Правильно! Ти молодець!';
+            feedbackEl.className = 'feedback correct';
+        } else {
+            feedbackEl.textContent = '❌ Ой, не зовсім так! Спробуй наступне запитання.';
+            feedbackEl.className = 'feedback incorrect';
+        }
+
+        currentQuestionIndex++;
+
+        setTimeout(() => {
+            if (currentQuestionIndex < questions.length) {
+                loadQuestion();
+            } else {
+                endGame();
+            }
+        }, 1800);
+    }
+
+    // Завершення гри
+    function endGame() {
+        questionTextEl.innerHTML = `🏆 Гра завершена!<br>Ти відповів правильно на ${score} з ${questions.length} запитань! Чудовий результат! ⭐`;
+        buttonsContainer.style.display = 'none';
+        feedbackEl.textContent = '';
+        restartBtn.style.display = 'inline-block';
+    }
+
+    // Перезапуск гри
+    function restartGame() {
+        currentQuestionIndex = 0;
+        score = 0;
+        scoreEl.textContent = score;
+        buttonsContainer.style.display = 'flex';
+        restartBtn.style.display = 'none';
+        loadQuestion();
+    }
+
+    // Ініціалізація першого запитання
+    loadQuestion();
+</script>
+
+</body>
+</html>
